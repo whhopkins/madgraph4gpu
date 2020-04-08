@@ -9,6 +9,7 @@
 - C++11 + features (move semantics, ...)
   - does nvcc support those? 
 - compiler flags
+- avoid if/then/else statements and other branches
 
 ### Original code generation
 
