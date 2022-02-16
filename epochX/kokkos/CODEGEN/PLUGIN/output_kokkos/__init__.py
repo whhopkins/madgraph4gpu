@@ -32,5 +32,5 @@ __email__ = ''
 __version__ = (1,0,0)
 minimal_mg5amcnlo_version = (2,3,4) 
 maximal_mg5amcnlo_version = (1000,1000,1000)
-latest_validated_version = (3,2,0)
+latest_validated_version = (3,1,1)
 

@@ -1720,7 +1720,7 @@ class CPPUFOHelasCallWriter(UFOHelasCallWriter):
         
 
 
-class GPUFOHelasCallWriter(CPPUFOHelasCallWriter):
+class KOUFOHelasCallWriter(CPPUFOHelasCallWriter):
 
 
     findcoupling = re.compile('pars->([-]*[\d\w_]+)\s*,')
