@@ -10,8 +10,8 @@
 #    example: new_output = {'myformat': MYCLASS}
 #    madgraph will then allow the command "output myformat PATH"
 #    MYCLASS should inherated of the class madgraph.iolibs.export_v4.VirtualExporter
-import PLUGIN.output_kokkos.output as output
-new_output = {'standalone_kokkos':output.MY_CPP_Standalone}
+import PLUGIN.KOKKOS_SA_OUTPUT.output as output
+new_output = {'standalone_kokkos':output.PLUGIN_ProcessExporter}
 
 # 2. Define new way to handle the cluster.
 #    example new_cluster = {'mycluster': MYCLUSTERCLASS}
