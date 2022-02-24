@@ -13,16 +13,16 @@ public:
         m_numiterations(numiterations), league_size(leaguesize), 
         team_size(teamsize), 
         dim(league_size * team_size),
-        cHel("cHel",ncomb,nexternal), hHel("hHel",ncomb,nexternal), 
-        cmME("cmME",nexternal), hmME("hmME",nexternal),
-        cIPC("cIPC",%(ncouplings)i), hIPC("hIPC",%(ncouplings)i), 
-        cIPD("cIPD",%(nparams)i), hIPD("hIPD",%(nparams)i) {
+        cHel("cHel",mgOnGpu::ncomb,mgOnGpu::npar), hHel("hHel",mgOnGpu::ncomb,mgOnGpu::npar), 
+        cmME("cmME",mgOnGpu::npar), hmME("hmME",mgOnGpu::npar),
+        cIPC("cIPC",mgOnGpu::ncouplings), hIPC("hIPC",mgOnGpu::ncouplings), 
+        cIPD("cIPD",mgOnGpu::nparams), hIPD("hIPD",mgOnGpu::nparams) {
 
     // Helicities for the process - nodim
     %(all_helicities)s
 
-    for(int i=0;i<ncomb;++i)
-        for(int j=0;j<nexternal;++j){
+    for(int i=0;i<mgOnGpu::ncomb;++i)
+        for(int j=0;j<mgOnGpu::npar;++j){
             hHel(i,j) = tHel[i][j];
         }
     Kokkos::deep_copy(cHel,hHel);
@@ -62,14 +62,14 @@ public:
 
   int getDim() const { return dim; }
 
-  int getNIOParticles() const { return nexternal; }
+  int getNIOParticles() const { return mgOnGpu::npar; }
 
 
   // Constants for array limits
-  static const int ninitial = mgKokkos::npari;
-  static const int nexternal = mgKokkos::npar;
+  static const int ninitial = mgOnGpu::npari;
+  static const int nexternal = mgOnGpu::npar;
   static const int nprocesses = %(nprocesses)d;
-  static const int ncomb = mgKokkos::ncomb;
+  static const int ncomb = mgOnGpu::ncomb;
 
   Kokkos::View<int**,ExecSpace> cHel;
   typename Kokkos::View<int**,ExecSpace>::HostMirror hHel;

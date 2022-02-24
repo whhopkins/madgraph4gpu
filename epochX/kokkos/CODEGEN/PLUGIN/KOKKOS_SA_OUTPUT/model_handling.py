@@ -918,7 +918,7 @@ class PLUGIN_OneProcessExporter(export_cpp.OneProcessExporterGPU):
         return file
 
     # AV - modify export_cpp.OneProcessExporterGPU method (fix gCPPProcess.cu)
-def get_all_sigmaKin_lines(self, color_amplitudes, class_name):
+    def get_all_sigmaKin_lines(self, color_amplitudes, class_name):
         """Get sigmaKin_process for all subprocesses for Pythia 8 .cc file"""
 
         ret_lines = []

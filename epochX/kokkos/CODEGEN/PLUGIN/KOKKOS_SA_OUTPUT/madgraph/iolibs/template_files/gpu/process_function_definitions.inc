@@ -2,7 +2,7 @@
 // Class member functions for calculating the matrix elements for
 %(process_lines)s
 
-using mgKokkos::ncomb; // number of helicity combinations
+using mgOnGpu::ncomb; // number of helicity combinations
 //--------------------------------------------------------------------------
 
 // Evaluate |M|^2 for each subprocess
