@@ -3,13 +3,12 @@
 %(info_lines)s
 //==========================================================================
 
-%(hel_amps_def)s
-
-
 #include <algorithm>
 #include <iostream>
-#include "mgKokkosTypes.h"
-#include "mgKokkosConfig.h"
+#include "mgOnGpuTypes.h"
+#include "mgOnGpuConfig.h"
 
 #include "CPPProcess.h"
+%(hel_amps_h)s
+%(process_function_definitions)s
 

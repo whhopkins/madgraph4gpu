@@ -1,7 +1,7 @@
 #ifndef MGKOKKOSTYPES_H
 #define MGKOKKOSTYPES_H 1
 
-#include "mgKokkosConfig.h"
+#include "mgOnGpuConfig.h"
 
 
 #ifdef THRUST_COMPLEX

@@ -591,12 +591,7 @@ class PLUGIN_UFOModelConverter(export_cpp.UFOModelConverterGPU):
     ###cc_ext = 'cu' # create HelAmps_sm.cu
     cc_ext = 'cc' # create HelAmps_sm.cc
 
-    # AV - keep defaults from export_cpp.UFOModelConverterGPU
-    ###cc_ext = 'cu'
-    ###aloha_template_h = pjoin('gpu','cpp_hel_amps_h.inc')
-    ###aloha_template_cc = pjoin('gpu','cpp_hel_amps_cc.inc')
-    ###helas_h = pjoin('gpu', 'helas.h')
-    ###helas_cc = pjoin('gpu', 'helas.cu')
+    self.helas_cc = pjoin('gpu', 'helas.cpp')
 
     # AV - use a custom ALOHAWriter (NB: this is an argument to WriterFactory.__new__, either a string or a class!)
     ###aloha_writer = 'cudac' # WriterFactory will use ALOHAWriterForGPU
@@ -874,13 +869,22 @@ class PLUGIN_OneProcessExporter(export_cpp.OneProcessExporterGPU):
             coupling[pos] = coup
         #coup_str = "const cxtype tIPC[%s] = { cxmake( m_pars->%s ) };\n" % (len(self.couplings2order), ' ), cxmake( m_pars->'.join(coupling))
 
+        coup_str = ''
+        for i in range(len(self.couplings2order)):
+            coup_str += "hIPC(%s) = pars->%s;\n" % (i, coupling[i])
+
+        for para, pos in self.params2order.items():
+            params[pos] = para            
+        
+        param_str = ''
+        for i in range(len(self.params2order)):
+            param_str += "hIPD(%s) = pars->%s;\n" % (i, params[i])
         # NSN - Need access to tIPC outside of CPPProcess for SYCL
         # coup_str = ""
         # for i in range(len(self.couplings2order)):
         #     coup_str += "m_tIPC[%s] = cxmake( m_pars->%s );\n" % (i, coupling[i])
 
-        for para, pos in self.params2order.items():
-            params[pos] = para
+       
         #param_str = "    const fptype tIPD[%s] = { (fptype)m_pars->%s };" % (len(self.params2order), ', (fptype)m_pars->'.join(params))
 
         # NSN - Need access to tIPD outside of CPPProcess for SYCL
@@ -974,10 +978,10 @@ KOKKOS_FUNCTION void calculate_wavefunctions(
         """Generate mgOnGpuConfig.h, CPPProcess.cc, CPPProcess.h, check_sa.cc, gXXX.cu links"""
         misc.sprint('Entering PLUGIN_OneProcessExporter.generate_process_files')
         super(export_cpp.OneProcessExporterGPU, self).generate_process_files()
-        self.edit_check_sa()
+        self.edit_check()
         self.edit_mgonGPU()
-        self.edit_processidfile() # AV new file (NB this is Sigma-specific, should not be a symlink to Subprocesses)
-        self.edit_testxxx() # AV new file (NB this is generic in Subprocesses and then linked in Sigma-specific)
+        #self.edit_processidfile() # AV new file (NB this is Sigma-specific, should not be a symlink to Subprocesses)
+        #self.edit_testxxx() # AV new file (NB this is generic in Subprocesses and then linked in Sigma-specific)
         # Add symbolic links
         #files.ln(pjoin(self.path, 'check_sa.cc'), self.path, 'gcheck_sa.cu')
         #files.ln(pjoin(self.path, 'CPPProcess.cc'), self.path, 'gCPPProcess.cu')
@@ -987,19 +991,16 @@ KOKKOS_FUNCTION void calculate_wavefunctions(
         #files.ln(pjoin(self.path, 'RandomNumberKernels.cc'), self.path, 'gRandomNumberKernels.cu')
         #files.ln(pjoin(self.path, 'BridgeKernels.cc'), self.path, 'gBridgeKernels.cu')
 
-    # AV - replace the export_cpp.OneProcessExporterGPU method (invert .cc/.cu, add debug printouts)
-    def edit_check_sa(self):
-        """Generate check_sa.cc"""
-        misc.sprint('Entering PLUGIN_OneProcessExporter.edit_check_sa')
-        template = open(pjoin(self.template_path,'gpu','check_sa.cc'),'r').read()
-        # AV May remove replace_dict as no replacement is done in check_sa.cc (in upstream Madgraph)
-        ###replace_dict = {}
-        ###replace_dict['nexternal'], _ = self.matrix_elements[0].get_nexternal_ninitial()
-        ###replace_dict['model'] = self.model_name
-        ###replace_dict['numproc'] = len(self.matrix_elements)
-        ff = open(pjoin(self.path, 'check_sa.cc'),'w')
+    def edit_check(self):
+        
+        template = open(pjoin(self.template_path, 'gpu', 'check.cpp'), 'r').read()
+        replace_dict = {}
+        replace_dict['nexternal'], _ = self.matrix_elements[0].get_nexternal_ninitial()
+        replace_dict['model'] = self.model_name
+        replace_dict['numproc'] = len(self.matrix_elements)
+
+        ff = open(pjoin(self.path, 'check.cpp'), 'w')
         ff.write(template)
-        ###ff.write(template % replace_dict) # AV normally this should be used! (and % should be %% in check_sa.cc)
         ff.close()
 
     # AV - add debug printouts over the export_cpp.OneProcessExporterGPU method

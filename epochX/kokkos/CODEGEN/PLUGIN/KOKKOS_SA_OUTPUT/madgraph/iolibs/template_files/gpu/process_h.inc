@@ -12,13 +12,13 @@
 #include <cassert>
 #include <iostream>
 
-#include "mgKokkosConfig.h"
-#include "mgKokkosTypes.h"
+#include "mgOnGpuConfig.h"
+#include "mgOnGpuTypes.h"
 #include "Kokkos_Core.hpp"
 
 #include "Parameters_%(model_name)s.h"
 
-namespace Proc
+namespace mg5amcGpu
 {
 
 %(process_class_definitions)s
@@ -26,6 +26,6 @@ namespace Proc
 
 %(process_function_definitions)s
 
-} // end namespace Proc
+} // end namespace mg5amcGpu
 
 #endif // MG5_%(process_file_name)s_H

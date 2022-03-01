@@ -7,7 +7,7 @@
 #ifndef HelAmps_%(model_name)s_H
 #define HelAmps_%(model_name)s_H
 
-#include "mgKokkosTypes.h"
+#include "mgOnGpuTypes.h"
 
 namespace %(namespace)s_%(model_name)s {
 

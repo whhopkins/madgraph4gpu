@@ -1,3 +1,5 @@
+///////////////////////// -*- C++ -*- /////////////////////////////
+
 //==========================================================================
 // A class for calculating the matrix elements for
 %(process_lines)s
@@ -9,46 +11,13 @@ class CPPProcess
 public:
 
   CPPProcess(int numiterations, int leaguesize, int teamsize,
-             bool verbose = false, bool debug = false): 
-        m_numiterations(numiterations), league_size(leaguesize), 
-        team_size(teamsize), 
-        dim(league_size * team_size),
-        cHel("cHel",mgOnGpu::ncomb,mgOnGpu::npar), hHel("hHel",mgOnGpu::ncomb,mgOnGpu::npar), 
-        cmME("cmME",mgOnGpu::npar), hmME("hmME",mgOnGpu::npar),
-        cIPC("cIPC",mgOnGpu::ncouplings), hIPC("hIPC",mgOnGpu::ncouplings), 
-        cIPD("cIPD",mgOnGpu::nparams), hIPD("hIPD",mgOnGpu::nparams) {
-
-    // Helicities for the process - nodim
-    %(all_helicities)s
-
-    for(int i=0;i<mgOnGpu::ncomb;++i)
-        for(int j=0;j<mgOnGpu::npar;++j){
-            hHel(i,j) = tHel[i][j];
-        }
-    Kokkos::deep_copy(cHel,hHel);
-  }
+             bool verbose = false, bool debug = false);
 
 
   ~CPPProcess() = default;
 
   // Initialize process.
-  virtual void initProc(std::string param_card_name){
-    // Instantiate the model class and set parameters that stay fixed during run
-    pars = Parameters_%(model_name)s::getInstance();
-    SLHAReader slha(param_card_name, m_verbose);
-    pars->setIndependentParameters(slha);
-    pars->setIndependentCouplings();
-    if (m_verbose) {
-        pars->printIndependentParameters();
-      pars->printIndependentCouplings();
-    }
-    pars->setDependentParameters();
-    pars->setDependentCouplings();
-    %(initProc_lines)s
-    
-    %(assign_coupling)s
-
-  }
+	virtual void initProc(std::string param_card_name);
 
 
   virtual int code() const { return 1; }

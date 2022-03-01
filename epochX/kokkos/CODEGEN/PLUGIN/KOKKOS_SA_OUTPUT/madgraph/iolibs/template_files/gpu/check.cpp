@@ -13,7 +13,7 @@
 
 #include "Kokkos_Core.hpp"
 #include "CPPProcess.h"
-#include "mgKokkosTypes.h"
+#include "mgOnGpuTypes.h"
 #include "random_generator.h"
 #include "rambo.h"
 #include "CalcMean.h"
