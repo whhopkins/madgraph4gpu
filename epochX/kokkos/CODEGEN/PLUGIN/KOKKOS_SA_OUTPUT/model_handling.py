@@ -98,10 +98,20 @@ class PLUGIN_ALOHAWriter(aloha_writers.ALOHAWriterForGPU):
     type2def['pointer_vertex'] = '*'  # using complex_t<double> * vertex)
     type2def['pointer_coup'] = ''
 
+    # AV - add vector types
+    # WH - this needs to be modified for kokkos.
+    type2def['double_v'] = 'fptype_sv'
+    type2def['complex_v'] = 'cxtype_sv'
+
     # can over write some things using:
-    def get_declaration_text(self, *args):
-        return ''
-    
+    # def get_declaration_text(self, *args):
+    #     return ''
+
+     # AV - modify C++ code from aloha_writers.ALOHAWriterForGPU
+    # AV new option: declare C++ variable type only when they are defined?
+    ###nodeclare = False # old behaviour (separate declaration with no initialization)
+    nodeclare = True # new behaviour (delayed declaration with initialisation)
+
     # AV - modify aloha_writers.ALOHAWriterForCPP method (improve formatting)
     def change_number_format(self, number):
         """Formatting the number"""
@@ -591,7 +601,7 @@ class PLUGIN_UFOModelConverter(export_cpp.UFOModelConverterGPU):
     ###cc_ext = 'cu' # create HelAmps_sm.cu
     cc_ext = 'cc' # create HelAmps_sm.cc
 
-    self.helas_cc = pjoin('gpu', 'helas.cpp')
+    helas_cc = pjoin('gpu', 'helas.cpp')
 
     # AV - use a custom ALOHAWriter (NB: this is an argument to WriterFactory.__new__, either a string or a class!)
     ###aloha_writer = 'cudac' # WriterFactory will use ALOHAWriterForGPU

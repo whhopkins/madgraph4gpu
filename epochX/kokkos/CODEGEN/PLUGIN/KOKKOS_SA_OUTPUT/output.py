@@ -53,7 +53,7 @@ def PLUGIN_cp(path1, path2, log=True, error=False):
 DEFAULT_cp = export_cpp.cp
 export_cpp.cp = PLUGIN_cp
 
-class PLUGIN_ProcessExporter(export_cpp.ProcessExporterCPP):
+class PLUGIN_ProcessExporter(export_cpp.ProcessExporterGPU):
     # Class structure information
     #  - object
     #  - VirtualExporter(object) [in madgraph/iolibs/export_v4.py]
@@ -100,7 +100,7 @@ class PLUGIN_ProcessExporter(export_cpp.ProcessExporterCPP):
                                  
     from_template = {'src': [s + 'gpu/rambo.h', s + 'read_slha.h', s + 'read_slha.cc',
                              s + 'gpu/Makefile_src', s + 'gpu/random_generator.h',
-                             s + 'gpu/mgGpuTypes.h', s + 'gpu/mgGpuConfig.h'],
+                             s + 'gpu/mgOnGpuTypes.h', s + 'gpu/mgOnGpuConfig.h'],
                      'SubProcesses': [s + 'gpu/Makefile', s + 'gpu/CalcMean.h']}
     to_link_in_P = ['Makefile', 'CalcMean.h']
 
@@ -108,11 +108,8 @@ class PLUGIN_ProcessExporter(export_cpp.ProcessExporterCPP):
     template_Sub_make = pjoin(PLUGINDIR, 'madgraph', 'iolibs', 'template_files','gpu','Makefile')
 
     # For model/aloha exporter (typically not used)
+    import PLUGIN.KOKKOS_SA_OUTPUT.model_handling as model_handling 
     create_model_class = model_handling.PLUGIN_UFOModelConverter
-    
-    # typically not defined but usufull for this tutorial the class for writing helas routine
-    # aloha_exporter = None
-    aloha_exporter = model_handling.PLUGIN_ALOHAWriter
     
     # AV - "aloha_exporter" is not used anywhere!
     # (OM: "typically not defined but useful for this tutorial - the class for writing helas routine")
