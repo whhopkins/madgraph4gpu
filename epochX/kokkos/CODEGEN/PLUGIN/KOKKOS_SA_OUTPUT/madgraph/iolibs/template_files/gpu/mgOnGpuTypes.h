@@ -1,5 +1,5 @@
-#ifndef MGKOKKOSTYPES_H
-#define MGKOKKOSTYPES_H 1
+#ifndef MGONGPUTYPES_H
+#define MGONGPUTYPES_H 1
 
 #include "mgOnGpuConfig.h"
 
@@ -35,4 +35,4 @@ inline void nvtxRangePop(void){
 #endif // __CUDACC__
 
 
-#endif // MGKOKKOSTYPES_H
+#endif // MGONGPUTYPES_H

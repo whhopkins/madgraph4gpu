@@ -15,7 +15,7 @@ CUDA_CXXFLAGS=$(CXXFLAGS) -I$(KOKKOSPATH_CUDA)/include -arch=compute_$(CUDA_ARCH
 CUDA_LDFLAGS=$(LDFLAGS) $(KOKKOSPATH_CUDA)/lib64/libkokkoscore.a -lnvToolsExt --openmp
 
 CXX=g++
-IPCX=icpx
+ICPX=icpx
 CLANG=clang++
 HIPCC=hipcc
 
