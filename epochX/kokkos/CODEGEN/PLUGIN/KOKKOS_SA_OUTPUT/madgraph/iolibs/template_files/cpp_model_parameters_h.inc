@@ -6,7 +6,9 @@
 #ifndef Parameters_%(model_name)s_H
 #define Parameters_%(model_name)s_H
 
-#include "mgOnGpuTypes.h"
+#include <complex>
+#include <cmath>
+//#include "mgOnGpuTypes.h"
 
 #include "read_slha.h"
 using namespace std;

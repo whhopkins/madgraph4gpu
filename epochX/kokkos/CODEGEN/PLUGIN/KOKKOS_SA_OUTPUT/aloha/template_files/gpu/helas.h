@@ -3,41 +3,41 @@
 
 template<typename T>
 KOKKOS_FUNCTION void ixxxxx(const T& pvec, const double fmass, 
-  const int nhel, const int nsf, complex_t<double> fi[6])
+  const int nhel, const int nsf, cxtype fi[6])
 {
   
-  fi[0] = complex_t<double> (-pvec(0) * nsf, -pvec(3) * nsf);
-  fi[1] = complex_t<double> (-pvec(1) * nsf, -pvec(2) * nsf);
+  fi[0] = cxtype (-pvec(0) * nsf, -pvec(3) * nsf);
+  fi[1] = cxtype (-pvec(1) * nsf, -pvec(2) * nsf);
   if (fmass != 0.0)
   {
-    double pp = min(pvec(0), sqrt(pvec(1) * pvec(1) + pvec(2) * pvec(2) + pvec(3) * pvec(3)));
+    double pp = fpmin(pvec(0), fpsqrt(pvec(1) * pvec(1) + pvec(2) * pvec(2) + pvec(3) * pvec(3)));
     if (pp == 0.0)
     {
-      double sqm[2] = {sqrt(abs(fmass)), 0.};
+      double sqm[2] = {fpsqrt(abs(fmass)), 0.};
       sqm[1] = (fmass < 0) ? -sqm[0] : sqm[0];
       const int ip = (1 + (nhel * nsf))/2;
       const int im = (1 - (nhel * nsf))/2;
-      fi[2] = complex_t<double>(ip * sqm[ip], 0.);
-      fi[3] = complex_t<double>(im * nsf * sqm[ip], 0.);
-      fi[4] = complex_t<double>(ip * nsf * sqm[im], 0.);
-      fi[5] = complex_t<double>(im * sqm[im], 0.);
+      fi[2] = cxtype(ip * sqm[ip], 0.);
+      fi[3] = cxtype(im * nsf * sqm[ip], 0.);
+      fi[4] = cxtype(ip * nsf * sqm[im], 0.);
+      fi[5] = cxtype(im * sqm[im], 0.);
     }
     else
     {
       const double sf[2] = { (1 + nsf + (1 - nsf) * (nhel * nsf)) * 0.5,
                              (1 + nsf - (1 - nsf) * (nhel * nsf)) * 0.5 };
-      double omega[2] = { sqrt(pvec(0) + pp), 0. };
+      double omega[2] = { fpsqrt(pvec(0) + pp), 0. };
       omega[1] = fmass / omega[0];
       const int ip = (1 + (nhel * nsf))/2;
       const int im = (1 - (nhel * nsf))/2;
       const double sfomega[2] = { sf[0] * omega[ip], sf[1] * omega[im] };
-      const double pp3 = max(pp + pvec(3), 0.0);
+      const double pp3 = fpmax(pp + pvec(3), 0.0);
       
-      const complex_t<double> chi[2] = { complex_t<double> (sqrt(pp3 * 0.5/pp), 0),
+      const cxtype chi[2] = { cxtype (fpsqrt(pp3 * 0.5/pp), 0),
                                                ( pp3 == 0. ?
-                                                 complex_t<double> (-(nhel * nsf), 0) :
-                                                 complex_t<double> ((nhel * nsf) * pvec(1), pvec(2)) 
-                                                                  / sqrt(2.0 * pp * pp3) ) };
+                                                 cxtype (-(nhel * nsf), 0) :
+                                                 cxtype ((nhel * nsf) * pvec(1), pvec(2)) 
+                                                                  / fpsqrt(2.0 * pp * pp3) ) };
       fi[2] = sfomega[0] * chi[im];
       fi[3] = sfomega[0] * chi[ip];
       fi[4] = sfomega[1] * chi[im];
@@ -46,15 +46,15 @@ KOKKOS_FUNCTION void ixxxxx(const T& pvec, const double fmass,
   }
   else
   { 
-    const double sqp0p3 = (pvec(1) == 0.0 and pvec(2) == 0.0 and pvec(3) < 0.0) ? 0. : sqrt(max(pvec(0) + pvec(3), 0.0)) * nsf;
+    const double sqp0p3 = (pvec(1) == 0.0 and pvec(2) == 0.0 and pvec(3) < 0.0) ? 0. : fpsqrt(fpmax(pvec(0) + pvec(3), 0.0)) * nsf;
 
-    const complex_t<double> chi[2] = {complex_t<double> (sqp0p3, 0.0),
-          (sqp0p3 == 0.0) ? complex_t<double> (-nhel * sqrt(2.0 * pvec(0)), 0.0) :
-                            complex_t<double> ((nhel * nsf) * pvec(1), pvec(2))/sqp0p3 };
+    const cxtype chi[2] = {cxtype (sqp0p3, 0.0),
+          (sqp0p3 == 0.0) ? cxtype (-nhel * fpsqrt(2.0 * pvec(0)), 0.0) :
+                            cxtype ((nhel * nsf) * pvec(1), pvec(2))/sqp0p3 };
     if ((nhel * nsf) == 1)
     {
-      fi[2] = complex_t<double> (0.0, 0.0);
-      fi[3] = complex_t<double> (0.0, 0.0);
+      fi[2] = cxtype (0.0, 0.0);
+      fi[3] = cxtype (0.0, 0.0);
       fi[4] = chi[0];
       fi[5] = chi[1];
     }
@@ -62,8 +62,8 @@ KOKKOS_FUNCTION void ixxxxx(const T& pvec, const double fmass,
     {
       fi[2] = chi[1];
       fi[3] = chi[0];
-      fi[4] = complex_t<double> (0.0, 0.0);
-      fi[5] = complex_t<double> (0.0, 0.0);
+      fi[4] = cxtype (0.0, 0.0);
+      fi[5] = cxtype (0.0, 0.0);
     }
   }
   return;
@@ -71,14 +71,14 @@ KOKKOS_FUNCTION void ixxxxx(const T& pvec, const double fmass,
 
 
 template<typename T>
-KOKKOS_FUNCTION void ipzxxx(const T& pvec, const int& nhel, const int& nsf, complex_t<double> fi[6])
+KOKKOS_FUNCTION void ipzxxx(const T& pvec, const int& nhel, const int& nsf, cxtype fi[6])
 {
   const double& pvec3 = pvec(3);
   
-  fi[0] = complex_t<double> (-pvec3 * nsf, -pvec3 * nsf);
-  fi[1] = complex_t<double> (0.,0.);
+  fi[0] = cxtype (-pvec3 * nsf, -pvec3 * nsf);
+  fi[1] = cxtype (0.,0.);
 
-  complex_t<double> sqp0p3 = complex_t<double>(sqrt(2.* pvec3) * nsf, 0.);
+  cxtype sqp0p3 = cxtype(fpsqrt(2.* pvec3) * nsf, 0.);
   const int nh = nhel * nsf;
   fi[2]=fi[1];
   if(nh==1){
@@ -93,13 +93,13 @@ KOKKOS_FUNCTION void ipzxxx(const T& pvec, const int& nhel, const int& nsf, comp
 
 
 template<typename T>
-KOKKOS_FUNCTION void imzxxx(const T& pvec, const int nhel, const int nsf, complex_t<double> fi[6])
+KOKKOS_FUNCTION void imzxxx(const T& pvec, const int nhel, const int nsf, cxtype fi[6])
 {
 
   const double& pvec3 = pvec(3);
-  fi[0] = complex_t<double> (pvec3 * nsf, -pvec3 * nsf);
-  fi[1] = complex_t<double> (0., 0.);
-  complex_t<double>  chi = complex_t<double> (-nhel * sqrt(-2.0 * pvec3), 0.0);
+  fi[0] = cxtype (pvec3 * nsf, -pvec3 * nsf);
+  fi[1] = cxtype (0., 0.);
+  cxtype  chi = cxtype (-nhel * fpsqrt(-2.0 * pvec3), 0.0);
   const int nh = nhel * nsf;
   fi[3]=fi[1];
   fi[4]=fi[1];
@@ -114,21 +114,21 @@ KOKKOS_FUNCTION void imzxxx(const T& pvec, const int nhel, const int nsf, comple
 
 
 template<typename T>
-KOKKOS_FUNCTION void ixzxxx(const T& pvec, const int& nhel, const int& nsf, complex_t<double> fi[6])
+KOKKOS_FUNCTION void ixzxxx(const T& pvec, const int& nhel, const int& nsf, cxtype fi[6])
 {
   const double& pvec0 = pvec(0);
   const double& pvec1 = pvec(1);
   const double& pvec2 = pvec(2);
   const double& pvec3 = pvec(3);
 
-  fi[0] = complex_t<double> (-pvec0 * nsf, -pvec2 * nsf);
-  fi[1] = complex_t<double> (-pvec0 * nsf, -pvec1 * nsf);
+  fi[0] = cxtype (-pvec0 * nsf, -pvec2 * nsf);
+  fi[1] = cxtype (-pvec0 * nsf, -pvec1 * nsf);
   const int nh = nhel * nsf;
 
-  float sqp0p3 = sqrtf(pvec0 + pvec3) * nsf;
-  complex_t<double> chi0 = complex_t<double> (sqp0p3, 0.0);
-  complex_t<double> chi1 = complex_t<double> (nh * pvec1/sqp0p3, pvec2/sqp0p3);
-  complex_t<double> CZERO = complex_t<double>(0.,0.);
+  float sqp0p3 = fpsqrt(pvec0 + pvec3) * nsf;
+  cxtype chi0 = cxtype (sqp0p3, 0.0);
+  cxtype chi1 = cxtype (nh * pvec1/sqp0p3, pvec2/sqp0p3);
+  cxtype CZERO = cxtype(0.,0.);
 
   if (nh ==1){
     fi[2]=CZERO;
@@ -148,60 +148,60 @@ KOKKOS_FUNCTION void ixzxxx(const T& pvec, const int& nhel, const int& nsf, comp
 
 template<typename T>
 KOKKOS_FUNCTION void vxxxxx(const T& pvec, const double vmass, 
-  const int nhel, const int nsv, complex_t<double> vc[6]) 
+  const int nhel, const int nsv, cxtype vc[6]) 
 {
   const double sqh = sqrt(0.5);
   const double hel = nhel;
   const int nsvahl = nsv * abs(hel);
-  vc[0] = complex_t<double> ( pvec(0) * nsv, pvec(3) * nsv );
-  vc[1] = complex_t<double> ( pvec(1) * nsv, pvec(2) * nsv );
+  vc[0] = cxtype ( pvec(0) * nsv, pvec(3) * nsv );
+  vc[1] = cxtype ( pvec(1) * nsv, pvec(2) * nsv );
   if ( vmass != 0. )
   {
     const double pt2 = (pvec(1) * pvec(1)) + (pvec(2) * pvec(2));
-    const double pp = min(pvec(0), sqrt(pt2 + (pvec(3) * pvec(3))));
-    const double pt = min(pp, sqrt(pt2));
+    const double pp = fpmin(pvec(0), sqrt(pt2 + (pvec(3) * pvec(3))));
+    const double pt = fpmin(pp, sqrt(pt2));
     const double hel0 = 1. - abs( hel );
     if ( pp == 0. )
     {
-      vc[2] = complex_t<double> ( 0., 0. );
-      vc[3] = complex_t<double> ( -hel * sqh, 0. );
-      vc[4] = complex_t<double> ( 0., nsvahl * sqh );
-      vc[5] = complex_t<double> ( hel0, 0. );
+      vc[2] = cxtype ( 0., 0. );
+      vc[3] = cxtype ( -hel * sqh, 0. );
+      vc[4] = cxtype ( 0., nsvahl * sqh );
+      vc[5] = cxtype ( hel0, 0. );
     }
     else
     {
       const double emp = pvec(0) / ( vmass * pp );
-      vc[2] = complex_t<double> ( hel0 * pp / vmass, 0. );
+      vc[2] = cxtype ( hel0 * pp / vmass, 0. );
       vc[5] = 
-      complex_t<double> ( hel0 * pvec(3) * emp + hel * pt / pp * sqh, 0. );
+      cxtype ( hel0 * pvec(3) * emp + hel * pt / pp * sqh, 0. );
       if ( pt != 0. )
       {
         const double pzpt = pvec(3) / ( pp * pt ) * sqh * hel;
-        vc[3] = complex_t<double> ( hel0 * pvec(1) * emp - pvec(1) * pzpt, -nsvahl * pvec(2) / pt * sqh);
-        vc[4] = complex_t<double> ( hel0 * pvec(2) * emp - pvec(2) * pzpt, nsvahl * pvec(1) / pt * sqh);
+        vc[3] = cxtype ( hel0 * pvec(1) * emp - pvec(1) * pzpt, -nsvahl * pvec(2) / pt * sqh);
+        vc[4] = cxtype ( hel0 * pvec(2) * emp - pvec(2) * pzpt, nsvahl * pvec(1) / pt * sqh);
       }
       else
       {
-        vc[3] = complex_t<double> ( -hel * sqh, 0. );
-        vc[4] = complex_t<double> (0., nsvahl * (pvec(3) < 0  ? -sqh : sqh ) );
+        vc[3] = cxtype ( -hel * sqh, 0. );
+        vc[4] = cxtype (0., nsvahl * (pvec(3) < 0  ? -sqh : sqh ) );
       }
     }
   }
   else
   {
     const double pt = sqrt((pvec(1) * pvec(1)) + (pvec(2) * pvec(2)));
-    vc[2] = complex_t<double> (0., 0. );
-    vc[5] = complex_t<double> (hel * pt / pvec(0) * sqh, 0. );
+    vc[2] = cxtype (0., 0. );
+    vc[5] = cxtype (hel * pt / pvec(0) * sqh, 0. );
     if ( pt != 0. )
     {
       const double pzpt = pvec(3) / (pvec(0) * pt) * sqh * hel;
-      vc[3] = complex_t<double> ( -pvec(1) * pzpt, -nsv * pvec(2) / pt * sqh);
-      vc[4] = complex_t<double> ( -pvec(2) * pzpt, nsv * pvec(1) / pt * sqh);
+      vc[3] = cxtype ( -pvec(1) * pzpt, -nsv * pvec(2) / pt * sqh);
+      vc[4] = cxtype ( -pvec(2) * pzpt, nsv * pvec(1) / pt * sqh);
     }
     else
     {
-      vc[3] = complex_t<double> ( -hel * sqh, 0. );
-      vc[4] = complex_t<double> ( 0., nsv * ( pvec(3) < 0 ? -sqh : sqh ) );
+      vc[3] = cxtype ( -hel * sqh, 0. );
+      vc[4] = cxtype ( 0., nsv * ( pvec(3) < 0 ? -sqh : sqh ) );
     }
   }
   return;
@@ -209,7 +209,7 @@ KOKKOS_FUNCTION void vxxxxx(const T& pvec, const double vmass,
 
 
 template<typename T>
-KOKKOS_FUNCTION  void sxxxxx(const T& pvec, const double& smass, const int& nhel, const int& nss, complex_t<double> sc[3])
+KOKKOS_FUNCTION  void sxxxxx(const T& pvec, const double& smass, const int& nhel, const int& nss, cxtype sc[3])
 {
   const double& p0 = pvec(0);
   const double& p1 = pvec(1);
@@ -217,33 +217,33 @@ KOKKOS_FUNCTION  void sxxxxx(const T& pvec, const double& smass, const int& nhel
   const double& p3 = pvec(3);
   //double p[4] = {0, pvec[0], pvec[1], pvec[2]};
   //p[0] = sqrt(p[1] * p[1] + p[2] * p[2] + p[3] * p[3]+smass*smass);
-  sc[2] = complex_t<double>(1.00, 0.00);
-  sc[0] = complex_t<double>(p0 * nss, p3 * nss);
-  sc[1] = complex_t<double>(p1 * nss, p2 * nss);
+  sc[2] = cxtype(1.00, 0.00);
+  sc[0] = cxtype(p0 * nss, p3 * nss);
+  sc[1] = cxtype(p1 * nss, p2 * nss);
   return;
 }
 
 
 template<typename T>
 KOKKOS_FUNCTION void oxxxxx(const T& pvec, const double fmass, 
-  const int nhel, const int nsf, complex_t<double> fo[6]) 
+  const int nhel, const int nsf, cxtype fo[6]) 
 {
 
-  fo[0] = complex_t<double> (pvec(0) * nsf, pvec(3) * nsf);
-  fo[1] = complex_t<double> (pvec(1) * nsf, pvec(2) * nsf);
+  fo[0] = cxtype (pvec(0) * nsf, pvec(3) * nsf);
+  fo[1] = cxtype (pvec(1) * nsf, pvec(2) * nsf);
   if (fmass != 0.)
   {
-    const double pp = min(pvec(0), sqrt((pvec(1) * pvec(1)) + (pvec(2) * pvec(2)) + (pvec(3) * pvec(3))));
+    const double pp = fpmin(pvec(0), sqrt((pvec(1) * pvec(1)) + (pvec(2) * pvec(2)) + (pvec(3) * pvec(3))));
     if (pp == 0.)
     {
       double sqm[2] = {sqrt(abs(fmass)), 0.};
       sqm[1] = fmass < 0 ? -sqm[0] : sqm[0];
       const int ip = -((1 - (nhel * nsf))/2) * nhel;
       const int im = (1 + (nhel * nsf))/2 * nhel;
-      fo[2] = complex_t<double> (im * sqm[abs(ip)], 0.);
-      fo[3] = complex_t<double> (ip * nsf * sqm[abs(ip)], 0.);
-      fo[4] = complex_t<double> (im * nsf * sqm[abs(im)], 0.);
-      fo[5] = complex_t<double> (ip * sqm[abs(im)], 0.);
+      fo[2] = cxtype (im * sqm[abs(ip)], 0.);
+      fo[3] = cxtype (ip * nsf * sqm[abs(ip)], 0.);
+      fo[4] = cxtype (im * nsf * sqm[abs(im)], 0.);
+      fo[5] = cxtype (ip * sqm[abs(im)], 0.);
     }
     else
     {
@@ -254,10 +254,10 @@ KOKKOS_FUNCTION void oxxxxx(const T& pvec, const double fmass,
       const int ip = (1 + (nhel * nsf))/2;
       const int im = (1 - (nhel * nsf))/2;
       double sfomeg[2] = { sf[0] * omega[ip], sf[1] * omega[im]};
-      const double pp3 = max(pp + pvec(3), 0.);
-      const complex_t<double> chi[2] = { complex_t<double> (sqrt(pp3 * 0.5/pp), 0.),
-                    pp3 == 0. ? complex_t<double> (-(nhel * nsf), 0.00) :
-                                complex_t<double> ((nhel * nsf) * pvec(1), -pvec(2))/sqrt(2.0 * pp * pp3)
+      const double pp3 = fpmax(pp + pvec(3), 0.);
+      const cxtype chi[2] = { cxtype (sqrt(pp3 * 0.5/pp), 0.),
+                    pp3 == 0. ? cxtype (-(nhel * nsf), 0.00) :
+                                cxtype ((nhel * nsf) * pvec(1), -pvec(2))/sqrt(2.0 * pp * pp3)
         };
       fo[2] = sfomeg[1] * chi[im];
       fo[3] = sfomeg[1] * chi[ip];
@@ -268,24 +268,24 @@ KOKKOS_FUNCTION void oxxxxx(const T& pvec, const double fmass,
   else
   {
     double sqp0p3 = ((pvec(1) == 0.00) and (pvec(2) == 0.00) and (pvec(3) < 0.00)) ?
-              0. : sqrt(max(pvec(0) + pvec(3), 0.00)) * nsf;
+              0. : sqrt(fpmax(pvec(0) + pvec(3), 0.00)) * nsf;
 
-    const complex_t<double> chi[2] = { complex_t<double> (sqp0p3, 0.00),
-            sqp0p3 == 0. ? complex_t<double> (-nhel, 0.) * sqrt(2. * pvec(0)) :
-                           complex_t<double> ((nhel * nsf) * pvec(1), -pvec(2))/sqp0p3
+    const cxtype chi[2] = { cxtype (sqp0p3, 0.00),
+            sqp0p3 == 0. ? cxtype (-nhel, 0.) * sqrt(2. * pvec(0)) :
+                           cxtype ((nhel * nsf) * pvec(1), -pvec(2))/sqp0p3
     };
 
     if ((nhel * nsf) == 1)
     {
       fo[2] = chi[0];
       fo[3] = chi[1];
-      fo[4] = complex_t<double> (0., 0.);
-      fo[5] = complex_t<double> (0., 0.);
+      fo[4] = cxtype (0., 0.);
+      fo[5] = cxtype (0., 0.);
     }
     else
     {
-      fo[2] = complex_t<double> (0., 0.);
-      fo[3] = complex_t<double> (0., 0.);
+      fo[2] = cxtype (0., 0.);
+      fo[3] = cxtype (0., 0.);
       fo[4] = chi[1];
       fo[5] = chi[0];
     }
@@ -294,7 +294,7 @@ KOKKOS_FUNCTION void oxxxxx(const T& pvec, const double fmass,
 }
 
 template<typename T>
-KOKKOS_FUNCTION  void opzxxx(const T& pvec, const int& nhel, const int& nsf, complex_t<double> fo[6])
+KOKKOS_FUNCTION  void opzxxx(const T& pvec, const int& nhel, const int& nsf, cxtype fo[6])
 {
   // ASSUMPTIONS FMASS =0
   // PX = PY =0
@@ -302,11 +302,11 @@ KOKKOS_FUNCTION  void opzxxx(const T& pvec, const int& nhel, const int& nsf, com
 
   const double& pvec3 = pvec(3);
 
-  fo[0] = complex_t<double> (pvec3 * nsf, pvec3 * nsf);
-  fo[1] = complex_t<double> (0., 0.);
+  fo[0] = cxtype (pvec3 * nsf, pvec3 * nsf);
+  fo[1] = cxtype (0., 0.);
   const int nh = nhel * nsf;
 
-  complex_t<double> CSQP0P3 = complex_t<double> (sqrt(2.* pvec3) * nsf, 0.00);
+  cxtype CSQP0P3 = cxtype (sqrt(2.* pvec3) * nsf, 0.00);
 
 
   fo[3]=fo[1];
@@ -322,17 +322,17 @@ KOKKOS_FUNCTION  void opzxxx(const T& pvec, const int& nhel, const int& nsf, com
 
 
 template<typename T>
-KOKKOS_FUNCTION  void omzxxx(const T& pvec, const int& nhel, const int& nsf, complex_t<double> fo[6])
+KOKKOS_FUNCTION  void omzxxx(const T& pvec, const int& nhel, const int& nsf, cxtype fo[6])
 {
   // ASSUMPTIONS FMASS =0
   // PX = PY =0
   // E = -PZ (E>0)
 
   const double& pvec3 = pvec(3);
-  fo[0] = complex_t<double> (-pvec3 * nsf, pvec3 * nsf);
-  fo[1] = complex_t<double> (0., 0.);
+  fo[0] = cxtype (-pvec3 * nsf, pvec3 * nsf);
+  fo[1] = cxtype (0., 0.);
   const int nh = nhel * nsf;
-  complex_t<double> chi = complex_t<double> (-nhel, 0.00) * sqrt(-2.0 * pvec3);
+  cxtype chi = cxtype (-nhel, 0.00) * sqrt(-2.0 * pvec3);
 
   if(nh==1){
     fo[2]=fo[1];
@@ -349,7 +349,7 @@ KOKKOS_FUNCTION  void omzxxx(const T& pvec, const int& nhel, const int& nsf, com
 }
 
 template<typename T>
-KOKKOS_FUNCTION  void oxzxxx(const T& pvec, const int& nhel, const int& nsf, complex_t<double> fo[6])
+KOKKOS_FUNCTION  void oxzxxx(const T& pvec, const int& nhel, const int& nsf, cxtype fo[6])
 {
   // ASSUMPTIONS FMASS =0
   // PT > 0
@@ -358,14 +358,14 @@ KOKKOS_FUNCTION  void oxzxxx(const T& pvec, const int& nhel, const int& nsf, com
   const double& p2 = pvec(2);
   const double& p3 = pvec(3);
 
-  fo[0] = complex_t<double> (p0 * nsf, p3 * nsf);
-  fo[1] = complex_t<double> (p1 * nsf, p2 * nsf);
+  fo[0] = cxtype (p0 * nsf, p3 * nsf);
+  fo[1] = cxtype (p1 * nsf, p2 * nsf);
   const int nh = nhel * nsf;
 
   float sqp0p3 = sqrtf(p0 + p3) * nsf;
-  complex_t<double> chi0 = complex_t<double> (sqp0p3, 0.00);
-  complex_t<double> chi1 = complex_t<double> (nh * p1/sqp0p3, -p2/sqp0p3);
-  complex_t<double> zero = complex_t<double> (0.00, 0.00);
+  cxtype chi0 = cxtype (sqp0p3, 0.00);
+  cxtype chi1 = cxtype (nh * p1/sqp0p3, -p2/sqp0p3);
+  cxtype zero = cxtype (0.00, 0.00);
 
   if(nh==1){
     fo[2]=chi0;

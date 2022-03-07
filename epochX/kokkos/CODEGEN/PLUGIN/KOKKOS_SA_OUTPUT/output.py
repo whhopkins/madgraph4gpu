@@ -100,7 +100,11 @@ class PLUGIN_ProcessExporter(export_cpp.ProcessExporterGPU):
                                  
     from_template = {'src': [s + 'gpu/rambo.h', s + 'read_slha.h', s + 'read_slha.cc',
                              s + 'gpu/Makefile_src', s + 'gpu/random_generator.h',
-                             s + 'gpu/mgOnGpuTypes.h', s + 'gpu/mgOnGpuConfig.h'],
+                             s + 'gpu/mgOnGpuCxtypes.h',
+                             s + 'gpu/mgOnGpuFptypes.h',
+                             s + 'gpu/mgOnGpuVectors.h',
+                             s + 'gpu/extras.h',
+                             s + 'gpu/mgOnGpuConfig.h'],
                      'SubProcesses': [s + 'gpu/Makefile', s + 'gpu/CalcMean.h']}
     to_link_in_P = ['Makefile', 'CalcMean.h']
 

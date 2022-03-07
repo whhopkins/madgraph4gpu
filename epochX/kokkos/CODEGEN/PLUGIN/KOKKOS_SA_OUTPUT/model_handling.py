@@ -87,14 +87,18 @@ class PLUGIN_ALOHAWriter(aloha_writers.ALOHAWriterForGPU):
     ###extension = '.cu'
     extension = '.cc'
     prefix = 'KOKKOS_FUNCTION'
-    realoperator = '.real()'
-    imagoperator = '.imag()'
-    ci_definition = 'complex_t<double> cI = complex_t<double>(0., 1.);\n'
-    
+    realoperator = 'cxreal' # NB now a function
+    imagoperator = 'cximag' # NB now a function
+
+    # realoperator = '.real()'
+    # imagoperator = '.imag()'
+    #ci_definition = 'complex_t<double> cI = complex_t<double>(0., 1.);\n'
+    ci_definition = 'const cxtype cI = cxmake( 0., 1. );\n'
+
     type2def = {}    
     type2def['int'] = 'int '
-    type2def['double'] = 'double '
-    type2def['complex'] = 'complex_t<double> '
+    type2def['double'] = 'fptype'
+    type2def['complex'] = 'cxtype'
     type2def['pointer_vertex'] = '*'  # using complex_t<double> * vertex)
     type2def['pointer_coup'] = ''
 
@@ -206,8 +210,10 @@ class PLUGIN_ALOHAWriter(aloha_writers.ALOHAWriterForGPU):
         out.write('  %(comment)s\n  %(template)s\n  %(prefix)s\n  void %(name)s( const %(args)s,\n%(indent)s%(output)s )%(suffix)s' %
                   {'comment': comment, # AV - add comment
                    'template': template, # AV - add template
-                   'prefix': self.prefix + ( ' INLINE' if 'is_h' in mode else '' ), # AV - add INLINE
-                   'suffix': ( ' ALWAYS_INLINE' if 'is_h' in mode else '' ), # AV - add ALWAYS_INLINE
+                   'prefix':'',
+                   'suffix':'',
+                   #'prefix': self.prefix + ( ' INLINE' if 'is_h' in mode else '' ), # AV - add INLINE
+                   #'suffix': ( ' ALWAYS_INLINE' if 'is_h' in mode else '' ), # AV - add ALWAYS_INLINE
                    'indent':indent, 'output':output, 'name': name,
                    'args': (',\n' + indent + 'const ').join(args)}) # AV - add const, add indent
         if 'is_h' in mode:
@@ -232,7 +238,7 @@ class PLUGIN_ALOHAWriter(aloha_writers.ALOHAWriterForGPU):
             Include the symmetry line (entry FFV_2)
         """
         out = StringIO()
-        out.write('    mgDebug( 0, __FUNCTION__ );\n') # AV
+        #out.write('    mgDebug( 0, __FUNCTION__ );\n') # AV
         ###argument_var = [name for type,name in self.call_arg] # UNUSED
         for type, name in self.call_arg:
             ###out.write('    %s %s;\n' % ( type, name ) ) # FOR DEBUGGING
@@ -474,7 +480,7 @@ class PLUGIN_ALOHAWriter(aloha_writers.ALOHAWriterForGPU):
                 out.write('    %s[%d] = %s * %s;\n' % (self.outname, # AV
                                         self.pass_to_HELAS(ind), coeff,
                                         self.write_obj(numerator.get_rep(ind))))
-        out.write('    mgDebug( 1, __FUNCTION__ );\n') # AV
+        #out.write('    mgDebug( 1, __FUNCTION__ );\n') # AV
         out.write('    return;\n') # AV
         ###return out.getvalue() # AV
         # AV check if one, two or half are used and need to be defined (ugly hack for #291: can this be done better?)
@@ -873,6 +879,7 @@ class PLUGIN_OneProcessExporter(export_cpp.OneProcessExporterGPU):
         replace_dict['nmodels'] = replace_dict['nparams'] + replace_dict['ncouplings']
         replace_dict['coupling_list'] = ' '
         replace_dict['hel_amps_cc'] = "#include \"HelAmps_%s.cc\"" % self.model_name # AV
+        
         coupling = [''] * len(self.couplings2order)
         params = [''] * len(self.params2order)
         for coup, pos in self.couplings2order.items():
@@ -949,9 +956,9 @@ KOKKOS_FUNCTION void calculate_wavefunctions(
 {""")
 
             ret_lines.append("using namespace MG5_%s;" % self.model_name)
-            ret_lines.append("complex_t<double> amp[1]; // was %i" % len(self.matrix_elements[0].get_all_amplitudes()))
+            ret_lines.append("cxtype<double> amp[1]; // was %i" % len(self.matrix_elements[0].get_all_amplitudes()))
             ret_lines.append("const int ncolor =  %i;" % len(color_amplitudes[0]))
-            ret_lines.append("complex_t<double> jamp[ncolor];")
+            ret_lines.append("cxtype<double> jamp[ncolor];")
             ret_lines.append("// Calculate wavefunctions for all processes")
             
             helas_calls = self.helas_call_writer.get_matrix_element_calls(self.matrix_elements[0], color_amplitudes[0])
@@ -959,7 +966,7 @@ KOKKOS_FUNCTION void calculate_wavefunctions(
             self.couplings2order = self.helas_call_writer.couplings2order
             self.params2order = self.helas_call_writer.params2order
             nwavefuncs = self.matrix_elements[0].get_number_of_wavefunctions()
-            ret_lines.append("complex_t<double> w[" + str(nwavefuncs) + "][mgKokkos::nw6];")
+            ret_lines.append("cxtype<double> w[" + str(nwavefuncs) + "][mgOnGpu::nw6];")
             
             ret_lines += helas_calls
             # ret_lines.append(self.get_calculate_wavefunctions(\
@@ -1067,10 +1074,26 @@ KOKKOS_FUNCTION void calculate_wavefunctions(
     def write_process_h_file(self, writer):
         """Generate final gCPPProcess.h"""
         misc.sprint('Entering PLUGIN_OneProcessExporter.write_process_h_file')
-        out = super().write_process_h_file(writer)
+        # WH: This is needed for Kokkos since it uses templated functions
+        # where the declaration and definition can't be separated.
+        replace_dict = super(export_cpp.OneProcessExporterGPU, self).write_process_h_file(False)
+        try:
+            replace_dict['helamps_h'] = open(pjoin(self.path, os.pardir, os.pardir,'src','HelAmps_%s.h' % self.model_name)).read()
+        except FileNotFoundError:
+            replace_dict['helamps_h'] = "\n#include \"../../src/HelAmps_%s.h\"" % self.model_name
+
+        cc_replace_dict = super(export_cpp.OneProcessExporterGPU, self).write_process_cc_file(False)
+        replace_dict['process_function_definitions'] = cc_replace_dict['process_function_definitions'] 
+
+        if writer:
+            file = super().read_template_file(super().process_template_h) % replace_dict
+            # Write the file
+            writer.writelines(file)
+        else:
+            return replace_dict
+        #out = super().write_process_h_file(writer)
         writer.seek(-1, os.SEEK_CUR)
         writer.truncate()
-        return out
 
     # AV - replace the export_cpp.OneProcessExporterGPU method (replace HelAmps.cu by HelAmps.cc)
     def super_write_process_cc_file(self, writer):
