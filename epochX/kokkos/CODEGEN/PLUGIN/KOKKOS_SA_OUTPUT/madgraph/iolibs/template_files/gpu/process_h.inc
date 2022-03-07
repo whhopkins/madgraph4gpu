@@ -13,7 +13,8 @@
 #include <iostream>
 
 #include "mgOnGpuConfig.h"
-#include "mgOnGpuTypes.h"
+#include "mgOnGpuVectors.h"
+
 #include "Kokkos_Core.hpp"
 
 #include "Parameters_%(model_name)s.h"
